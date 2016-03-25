@@ -1,3 +1,4 @@
+import pytest
 from lis import *
 
 
@@ -64,3 +65,20 @@ def test_norvig_suite():
 
     for (expr, expected) in lis_tests:
         assert eval(parse(expr)) == expected
+
+
+def test_schemestr_str():
+    assert schemestr(123) == '123'
+
+
+def test_schemestr_list():
+    assert schemestr([1, 2, 3]) == '(1 2 3)'
+
+
+def test_parse_empty_line():
+    with pytest.raises(SyntaxError):
+        parse('')
+
+def test_parse_extra_paren():
+    with pytest.raises(SyntaxError):
+        parse(')')

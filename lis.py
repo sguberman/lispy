@@ -166,6 +166,6 @@ def schemestr(exp):
     Convert a Python object back into a Scheme-readable string.
     """
     if isinstance(exp, list):
-        return '(' + '.'.join(map(schemestr, exp)) + ')'
+        return '(' + ' '.join(map(schemestr, exp)) + ')'
     else:
         return str(exp)

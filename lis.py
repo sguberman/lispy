@@ -155,6 +155,11 @@ def repl(prompt='list.py> '):
     """
     A prompt-read-eval-print loop.
     """
+    try:  # make input safe for python2, if needed
+        input = raw_input
+    except NameError:
+        pass
+
     while True:
         val = eval(parse(input(prompt)))
         if val is not None:

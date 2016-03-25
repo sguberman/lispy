@@ -15,3 +15,8 @@ def test_parse():
 
 def test_eval():
     assert eval(parse(program)) == 314.1592653589793
+
+
+def test_lambda_procedure():
+    program = '(begin (define circle-area (lambda (r) (* pi (* r r)))) (circle-area 10))'
+    assert eval(parse(program)) == 314.1592653589793

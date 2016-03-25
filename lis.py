@@ -47,7 +47,32 @@ def atom(token):
 Symbol = str            # A Scheme Symbol is implemented as a Python str
 List = list             # A Scheme List is implemented as a Python list
 Number = (int, float)   # A Scheme Number is implemented as a Python int or float
-Env = dict              # An environment is a mapping of {variable: value}
+
+
+class Procedure(object):
+    """
+    A user-defined Scheme procedure.
+    """
+    def __init__(self, parms, body, env):
+        self.parms, self.body, self.env = parms, body, env
+
+    def __call__(self, *args):
+        return eval(self.body, Env(self.parms, args, self.env))
+
+
+class Env(dict):
+    """
+    An environment: a dict of {'var':val} pairs, with an outer Env.
+    """
+    def __init__(self, parms=(), args=(), outer=None):
+        self.update(zip(parms, args))
+        self.outer = outer
+
+    def find(self, var):
+        """
+        Find the innermost Env where var appears.
+        """
+        return self if (var in self) else self.outer.find(var)
 
 
 def standard_env():
@@ -80,7 +105,7 @@ def standard_env():
         'length': len,
         'list': lambda *x: list(x),
         'list?': lambda x: isinstance(x, list),
-        'map': map,
+        'map': lambda *x: list(map(x[0], x[1])),
         'max': max,
         'min': min,
         'not': op.not_,
@@ -101,7 +126,7 @@ def eval(x, env=global_env):
     Evaluate an expression in an environment.
     """
     if isinstance(x, Symbol):       # variable reference
-        return env[x]
+        return env.find(x)[x]
     elif not isinstance(x, List):   # constant literal
         return x
     elif x[0] == 'quote':           # (quote exp)
@@ -114,6 +139,12 @@ def eval(x, env=global_env):
     elif x[0] == 'define':          # (define var exp)
         (_, var, exp) = x
         env[var] = eval(exp, env)
+    elif x[0] == 'set!':            # (set! var exp)
+        (_, var, exp) = x
+        env.find(var)[var] = eval(exp, env)
+    elif x[0] == 'lambda':          # (lambda (var...) body)
+        (_, parms, body) = x
+        return Procedure(parms, body, env)
     else:
         proc = eval(x[0], env)
         args = [eval(arg, env) for arg in x[1:]]
